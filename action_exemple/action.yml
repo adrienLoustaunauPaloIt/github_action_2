@@ -1,0 +1,46 @@
+name: whitelabel-ci
+description: Continuous integration main
+
+inputs:
+  CLIENT:
+    required: true
+    description: 'Which client: default, vrtp ...'
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ inputs.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ inputs.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
+      shell: bash
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm list
+
+    - name: Set env
+      shell: bash
+      run: |
+        cp infra/env/.env.${{inputs.ENVIRONMENT}}.${{inputs.CLIENT}} .env
+
+    - name: Install package
+      shell: bash
+      run: npm install
+
+
+    - name: Build
+      shell: bash
+      run: npm run build
+

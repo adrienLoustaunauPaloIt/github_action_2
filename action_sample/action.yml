@@ -1,0 +1,17 @@
+name: My_Action
+description: Continuous integration main
+
+inputs:
+  CLIENT:
+    required: true
+    description: 'Which client: default, vrtp ...'
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Set env
+      shell: bash
+      run: |
+        echo Hello ${{inputs.CLIENT}}
+
